@@ -1,0 +1,33 @@
+{
+  "name": "digital-korsou-api",
+  "version": "0.1.0",
+  "description": "API layer for Digital Kòrsou - Boske di AI",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "format": "prettier --write src/"
+  },
+  "dependencies": {
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "wrangler": "^3.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
+  },
+  "keywords": [
+    "curacao",
+    "papiamentu",
+    "ai",
+    "gpt",
+    "cloudflare-workers"
+  ],
+  "author": "Digital Kòrsou Taskforce",
+  "license": "MIT"
+}
