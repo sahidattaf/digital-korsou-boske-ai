@@ -47,4 +47,42 @@ Guides users into the right AI agent in Papiamentu or English.
 ---
 
 ## 🧱 Repository Structure
+igital-korsou-ai/
+├─ README.md
+├─ agents/ # Individual GPT agent definitions
+├─ prompts/ # System & user prompts
+├─ api/ # Cloudflare Workers (API layer)
+├─ brand/ # Logo, colors, visuals
+├─ docs/ # Guides & documentation
+└─ notion/ # Notion schemas & exports
+
+
+---
+
+## ☁️ Deployment
+- **Frontend / API:** Cloudflare Workers
+- **AI Models:** OpenAI / compatible providers
+- **Knowledge:** Notion, Markdown, structured datasets
+
+---
+
+## 🤝 Contributing
+We welcome contributors who respect:
+- Cultural context
+- Language accuracy
+- Ethical AI use
+
+Open a pull request or issue to propose changes.
+
+---
+
+## ❤️ Final Note
+> *AI should grow like a tree: slowly, rooted, and for everyone.*
+
+---
+
+© Digital Kòrsou Taskforce
+
+
+
 
