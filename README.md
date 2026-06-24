@@ -18,12 +18,13 @@ Currently implemented:
 - Request validation for invalid JSON, missing messages, and oversized messages
 - Local language detection, intent classification, and agent selection
 - Safe local responses when `OPENAI_API_KEY` is not configured
+- Optional OpenAI chat responses when `OPENAI_API_KEY` is configured
+- Safe fallback responses when OpenAI fails or times out
 - TypeScript, ESLint, Prettier, and Vitest configuration
 - API tests for the implemented endpoints
 
 Not implemented yet:
 
-- Real OpenAI responses
 - Persistent conversation memory
 - Notion or database-backed knowledge retrieval
 - User accounts or rate limiting
@@ -87,11 +88,24 @@ Response when no `OPENAI_API_KEY` is configured:
 }
 ```
 
+Response modes:
+
+- `local`: deterministic local routed response when no OpenAI key is configured
+- `openai`: OpenAI returned a successful response
+- `fallback`: OpenAI was configured but failed or timed out, so the local routed response was returned
+
 Validation:
 
 - Invalid JSON returns `400`
 - Missing or empty `message` returns `400`
 - Messages over 4000 characters return `413`
+
+OpenAI policy:
+
+- `/api/chat` always runs local routing first and preserves the selected pilot agent.
+- OpenAI is called only when `OPENAI_API_KEY` exists.
+- Raw OpenAI errors are never exposed to users.
+- User messages are sent only for the current request; this baseline does not store user data, memory, or conversation history.
 
 ## Development
 
@@ -100,7 +114,7 @@ Prerequisites:
 - Node.js 18+
 - pnpm
 - Cloudflare account for deployment
-- OpenAI API key only when real model responses are added
+- OpenAI API key for live model responses
 
 Install and run:
 
@@ -134,6 +148,8 @@ Secrets should be configured with Wrangler, not committed:
 cd api
 npx wrangler secret put OPENAI_API_KEY
 ```
+
+Without this secret, `/api/chat` continues to return local fallback responses.
 
 ## Repository Structure
 

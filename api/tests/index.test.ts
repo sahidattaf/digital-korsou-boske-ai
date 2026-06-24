@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import worker from '../src';
 import type { Env } from '../src/types';
 
@@ -15,6 +15,7 @@ interface ChatBody {
   intent: string;
   language: string;
   mode: string;
+  response: string;
 }
 
 interface ErrorBody {
@@ -26,6 +27,10 @@ function request(path: string, init?: RequestInit): Request {
 }
 
 describe('Digital Korsou Worker', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('responds to GET /api/health', async () => {
     const response = await worker.fetch(request('/api/health'), env);
     const body = (await response.json()) as { status: string; environment: string };
@@ -49,7 +54,10 @@ describe('Digital Korsou Worker', () => {
     ]);
   });
 
-  it('routes POST /api/chat through the local orchestrator', async () => {
+  it('returns local fallback without an OpenAI API key', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
     const response = await worker.fetch(
       request('/api/chat', {
         method: 'POST',
@@ -67,6 +75,63 @@ describe('Digital Korsou Worker', () => {
     expect(body.intent).toBe('education');
     expect(body.language).toBe('pap');
     expect(body.mode).toBe('local');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('attempts OpenAI when an API key exists', async () => {
+    const fetchMock = vi.fn(async () =>
+      Response.json({
+        choices: [
+          {
+            message: {
+              content: 'Bon dia! Mi por yuda bo traha e checklist aki.',
+            },
+          },
+        ],
+      })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await worker.fetch(
+      request('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: 'Please build a checklist for a neighborhood cleanup.',
+        }),
+      }),
+      { ...env, OPENAI_API_KEY: 'test-key' }
+    );
+    const body = (await response.json()) as ChatBody;
+
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(body.mode).toBe('openai');
+    expect(body.agent.id).toBe('toolmaker-gpt');
+    expect(body.response).toBe('Bon dia! Mi por yuda bo traha e checklist aki.');
+  });
+
+  it('returns fallback when OpenAI fails and preserves the selected agent', async () => {
+    const fetchMock = vi.fn(async () => Response.json({ error: 'bad upstream' }, { status: 500 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await worker.fetch(
+      request('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: 'Mi ta buska trabou y mi mester yudansa ku mi CV.',
+        }),
+      }),
+      { ...env, OPENAI_API_KEY: 'test-key' }
+    );
+    const body = (await response.json()) as ChatBody;
+
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(body.mode).toBe('fallback');
+    expect(body.agent.id).toBe('job-gpt');
+    expect(body.intent).toBe('jobs');
   });
 
   it('returns 400 for invalid JSON', async () => {
