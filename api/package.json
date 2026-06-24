@@ -6,20 +6,24 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "test": "vitest",
-    "lint": "eslint src/",
-    "format": "prettier --write src/"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\" \"*.{json,ts,cjs}\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"*.{json,ts,cjs}\""
   },
   "dependencies": {
     "openai": "^4.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.62.0",
+    "@typescript-eslint/parser": "^8.62.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
     "typescript": "^5.0.0",
     "vitest": "^1.0.0",
-    "wrangler": "^3.0.0",
-    "eslint": "^8.0.0",
-    "prettier": "^3.0.0"
+    "wrangler": "^3.0.0"
   },
   "keywords": [
     "curacao",

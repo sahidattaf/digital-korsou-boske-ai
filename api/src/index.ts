@@ -1,85 +1,103 @@
-/**
- * Digital Kòrsou – Boske di AI
- * Main API Entry Point
- */
+import { PILOT_AGENTS } from './agents';
+import { createFallbackResponse } from './orchestrator';
+import type { ChatRequest, Env, ErrorResponse } from './types';
 
-export interface Env {
-  OPENAI_API_KEY: string;
-  NOTION_API_KEY?: string;
-  ENVIRONMENT: string;
+const MAX_MESSAGE_LENGTH = 4000;
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+function jsonResponse<TBody>(body: TBody, init: ResponseInit = {}): Response {
+  return Response.json(body, {
+    ...init,
+    headers: {
+      ...corsHeaders,
+      ...init.headers,
+    },
+  });
+}
+
+function errorResponse(error: string, status: number, details?: string): Response {
+  const body: ErrorResponse = details ? { error, details } : { error };
+
+  return jsonResponse(body, { status });
+}
+
+async function parseChatRequest(request: Request): Promise<ChatRequest | Response> {
+  let body: unknown;
+
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse('Invalid JSON', 400);
+  }
+
+  if (!body || typeof body !== 'object') {
+    return errorResponse('Missing message', 400);
+  }
+
+  const maybeBody = body as Partial<ChatRequest>;
+
+  if (typeof maybeBody.message !== 'string' || maybeBody.message.trim().length === 0) {
+    return errorResponse('Missing message', 400);
+  }
+
+  if (maybeBody.message.length > MAX_MESSAGE_LENGTH) {
+    return errorResponse(
+      'Message too long',
+      413,
+      `Maximum length is ${MAX_MESSAGE_LENGTH} characters`
+    );
+  }
+
+  return {
+    message: maybeBody.message.trim(),
+    language: maybeBody.language,
+  };
 }
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    const path = url.pathname;
 
-    // CORS headers
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
-
-    // Handle preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders });
     }
 
-    // Routes
     try {
-      // Health check
-      if (path === '/api/health') {
-        return Response.json(
-          { status: 'ok', environment: env.ENVIRONMENT },
-          { headers: corsHeaders }
-        );
+      if (url.pathname === '/api/health' && request.method === 'GET') {
+        return jsonResponse({
+          status: 'ok',
+          environment: env.ENVIRONMENT ?? 'development',
+        });
       }
 
-      // List agents
-      if (path === '/api/agents') {
-        return Response.json(
-          {
-            agents: [
-              { id: 'edu-gpt', name: 'EduGPT', tree: 'Kenepa', domain: 'Education' },
-              { id: 'traha-gpt', name: 'TrahaGPT', tree: 'Watapana', domain: 'Employment' },
-              { id: 'kultu-gpt', name: 'KultuGPT', tree: 'Divi-divi', domain: 'Culture' },
-              { id: 'salu-gpt', name: 'SaluGPT', tree: 'Kadushi', domain: 'Health' },
-              { id: 'lei-gpt', name: 'LeiGPT', tree: 'Manzalina', domain: 'Legal' },
-              { id: 'negoshi-gpt', name: 'NegoshiGPT', tree: 'Palu di Sia', domain: 'Business' },
-              { id: 'sosial-gpt', name: 'SosialGPT', tree: 'Tamarein', domain: 'Social' },
-              { id: 'eko-gpt', name: 'EkoGPT', tree: 'Kibrahacha', domain: 'Environment' },
-            ],
-          },
-          { headers: corsHeaders }
-        );
+      if (url.pathname === '/api/agents' && request.method === 'GET') {
+        return jsonResponse({ agents: PILOT_AGENTS });
       }
 
-      // Main chat endpoint
-      if (path === '/api/chat' && request.method === 'POST') {
-        const body = await request.json() as { message: string; language?: string };
+      if (url.pathname === '/api/chat' && request.method === 'POST') {
+        const parsed = await parseChatRequest(request);
 
-        // TODO: Implement orchestrator routing and agent responses
-        return Response.json(
-          {
-            response: 'Bon dia! Digital Kòrsou ta bini pronto. Danki pa bo interes!',
-            agent: 'arrival-gpt',
-            language: body.language || 'pap',
-          },
-          { headers: corsHeaders }
+        if (parsed instanceof Response) {
+          return parsed;
+        }
+
+        const response = createFallbackResponse(
+          parsed.message,
+          parsed.language,
+          Boolean(env.OPENAI_API_KEY)
         );
+
+        return jsonResponse(response);
       }
 
-      // 404 for unknown routes
-      return Response.json(
-        { error: 'Not found', path },
-        { status: 404, headers: corsHeaders }
-      );
-    } catch (error) {
-      return Response.json(
-        { error: 'Internal server error' },
-        { status: 500, headers: corsHeaders }
-      );
+      return errorResponse('Not found', 404);
+    } catch {
+      return errorResponse('Internal server error', 500);
     }
   },
 };
