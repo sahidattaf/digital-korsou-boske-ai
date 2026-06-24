@@ -1,4 +1,5 @@
 import { PILOT_AGENTS } from './agents';
+import { createOpenAIChatResponse } from './openaiClient';
 import { createFallbackResponse } from './orchestrator';
 import type { ChatRequest, Env, ErrorResponse } from './types';
 
@@ -86,13 +87,26 @@ export default {
           return parsed;
         }
 
-        const response = createFallbackResponse(
-          parsed.message,
-          parsed.language,
-          Boolean(env.OPENAI_API_KEY)
-        );
+        const fallbackResponse = createFallbackResponse(parsed.message, parsed.language);
 
-        return jsonResponse(response);
+        if (!env.OPENAI_API_KEY) {
+          return jsonResponse(fallbackResponse);
+        }
+
+        try {
+          const openAIResponse = await createOpenAIChatResponse({
+            apiKey: env.OPENAI_API_KEY,
+            request: parsed,
+            fallback: fallbackResponse,
+          });
+
+          return jsonResponse(openAIResponse);
+        } catch {
+          return jsonResponse({
+            ...fallbackResponse,
+            mode: 'fallback',
+          });
+        }
       }
 
       return errorResponse('Not found', 404);

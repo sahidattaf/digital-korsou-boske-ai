@@ -23,7 +23,7 @@ export interface ChatResponse {
   agent: Pick<AgentMetadata, 'id' | 'name' | 'role'>;
   language: LanguageCode;
   intent: Intent;
-  mode: 'local' | 'openai-ready';
+  mode: 'local' | 'openai' | 'fallback';
 }
 
 export interface ErrorResponse {

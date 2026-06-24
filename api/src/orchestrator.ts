@@ -105,7 +105,7 @@ export function selectAgent(intent: Intent): AgentMetadata {
 export function createFallbackResponse(
   message: string,
   requestedLanguage?: LanguageCode,
-  openAiConfigured = false
+  mode: ChatResponse['mode'] = 'local'
 ): ChatResponse {
   const language = detectLanguage(message, requestedLanguage);
   const intent = classifyIntent(message);
@@ -121,7 +121,7 @@ export function createFallbackResponse(
     },
     language,
     intent,
-    mode: openAiConfigured ? 'openai-ready' : 'local',
+    mode,
   };
 }
 

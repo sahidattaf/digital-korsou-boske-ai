@@ -4,7 +4,7 @@
 
 Add safe OpenAI integration behind `/api/chat` while preserving the deterministic local fallback from Sprint 0.
 
-Sprint 1 should make the chat endpoint capable of using OpenAI when `OPENAI_API_KEY` is configured, but the Worker must continue to behave safely when the key is absent, invalid, or when OpenAI is unavailable.
+Sprint 1 makes the chat endpoint capable of using OpenAI when `OPENAI_API_KEY` is configured, but the Worker must continue to behave safely when the key is absent, invalid, or when OpenAI is unavailable.
 
 ## Constraints
 
@@ -33,11 +33,51 @@ Sprint 0 provides:
 - Deterministic local fallback responses
 - Vitest coverage for core endpoint behavior
 
+Sprint 1 current behavior:
+
+- `/api/chat` runs local routing first.
+- The selected pilot agent is preserved for OpenAI and fallback responses.
+- If `OPENAI_API_KEY` is missing, the response mode is `local`.
+- If OpenAI succeeds, the response mode is `openai`.
+- If OpenAI fails or times out, the response mode is `fallback`.
+- Raw OpenAI errors are not exposed to the user.
+- User data is not stored and no memory/database feature is added.
+
+## OpenAI Setup
+
+Set the API key as a Cloudflare Worker secret:
+
+```bash
+cd api
+npx wrangler secret put OPENAI_API_KEY
+```
+
+Local development can omit the key. Without it, `/api/chat` returns the deterministic local fallback.
+
+## Fallback Policy
+
+The fallback policy is intentionally conservative:
+
+- Missing key: return local routed response.
+- OpenAI non-2xx response: return local routed response with `mode: "fallback"`.
+- OpenAI timeout: return local routed response with `mode: "fallback"`.
+- Empty OpenAI content: return local routed response with `mode: "fallback"`.
+
+## Test Commands
+
+```bash
+cd api
+pnpm run typecheck
+pnpm run lint
+pnpm run test
+pnpm run format:check
+```
+
 ## Sprint 1 Issues
 
 ### 1. Add OpenAI Chat Adapter
 
-Create a small adapter module that isolates provider-specific logic from the Worker route.
+Status: implemented as a small adapter module that isolates provider-specific logic from the Worker route.
 
 Suggested scope:
 
