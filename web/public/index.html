@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pap">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#093b3a"/>
+<meta name="description" content="Digital Kòrsou — Boske di AI: supervised five-agent pilot demonstration."/>
+<title>Digital Kòrsou · Boske di AI — Pilot Demo</title><link rel="stylesheet" href="/styles.css"/>
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+ <a href="/" class="brand"><span class="brand-mark">✳</span><span>DIGITAL <b>KÒRSOU</b><small>BOSKE DI AI · AI KU RAIS DEN PUEBLO</small></span></a>
+ <div class="toolbar"><div class="langs" role="group" aria-label="Language">
+ <button type="button" data-lang="pap" aria-pressed="true" class="active">PAP</button>
+ <button type="button" data-lang="en" aria-pressed="false">EN</button>
+ <button type="button" data-lang="nl" aria-pressed="false">NL</button></div>
+ <span class="pilot-pill"><span class="signal"></span> 90-DAY PILOT</span></div>
+</header>
+<section class="hero">
+ <div class="hero-copy"><div class="eyebrow">CURAÇAO · HUMAN-CENTERED AI · PREVIEW</div>
+ <h1 id="hero-title">Un boske digital ku raiz den nos pueblo<span>.</span></h1>
+ <p id="hero-desc">Un demonstrashon supervisá di sinku ruta di AI pa siñamentu, trabou, negoshi i komunidat. Kultura promé. Hende na mando.</p>
+ <div class="hero-metrics"><div><b>05</b><small>PILOT AGENTS</small></div><div><b>90</b><small>PILOT DAYS</small></div><div><b>03</b><small>DEMO LANGUAGES</small></div></div></div>
+ <div class="hero-art" aria-hidden="true"><div class="sun"></div><div class="ring"></div><div class="trunk"></div><div class="leaf a"></div><div class="leaf b"></div><div class="leaf c"></div><div class="leaf d"></div><div class="ground"></div></div>
+</section>
+<main class="workspace">
+ <section class="panel agent-panel">
+  <div class="section-title"><span class="number">01</span><div><small id="agents-eyebrow">SINKU RUTA DI PILOT</small><h2 id="agents-title">Skohe un ruta</h2></div></div>
+  <div id="agents" role="group" aria-label="Five pilot agents" class="agents"></div>
+  <p id="agent-note" class="panel-note">E router ta selektá e ruta segun e pregunta. E demo no ta agregá agents nobo.</p>
+ </section>
+ <section class="panel demo-panel">
+  <div class="demo-heading"><div class="section-title"><span class="number">02</span><div><small id="demo-eyebrow">INTERAKSHON SUPERVISÁ</small><h2 id="demo-title">Demostrashon interaktivo</h2></div></div><span id="mode" class="mode">● SIMULASHON</span></div>
+  <div class="notice"><strong>ⓘ</strong><p id="disclosure">Modo demo: no ta manda dato na backend. Konekshon live ta visibel solamente ora Cloudflare Worker a wordu verificá.</p></div>
+  <div id="transcript" role="log" aria-live="polite" aria-relevant="additions" class="transcript"></div>
+  <label class="prompt-label" id="prompt-label">TRATA UN PROMPT</label><div id="suggestions" class="suggestions"></div>
+  <form id="chat"><label class="sr-only" for="message">Pregunta</label><textarea maxlength="4000" rows="2" required id="message" placeholder="Skirbi bo pregunta aki…"></textarea><button id="send" class="send" type="submit">Manda ↗</button></form>
+  <div class="under-chat"><span id="privacy">No inkluí nòmber, number di telefòn ni dato sensitiv.</span><div><button id="toggle" type="button" hidden></button><button id="clear" type="button">Limpia</button></div></div>
+ </section>
+ <aside class="right">
+  <section class="panel overview"><div class="section-title"><span class="number">03</span><div><small id="brief-eyebrow">PA E REUNION</small><h2 id="brief-title">E piloto den korto</h2></div></div>
+  <p class="brief-lead" id="brief-lead">Un prueba chikí, medibel i ku supervisión humano.</p>
+  <div class="phases"><div><b>01</b><span><strong>Foundation</strong><small id="phase-a">Privacidat, prompts i test</small></span></div><div><b>02</b><span><strong>Launch & Learn</strong><small id="phase-b">Taller i feedback supervisá</small></span></div><div><b>03</b><span><strong>Iterate & Expand</strong><small id="phase-c">Mehora e sinku pilot agents</small></span></div></div>
+  </section>
+  <section class="metrics"><small id="measure-head">KIKO NOS TA MIDI</small><p id="measure-a">◉ Klaridat di orientashon</p><p id="measure-b">◇ Participashon den taller</p><p id="measure-c">◌ Feedback i caso di seguridat</p></section>
+  <p id="independent" class="independent">Inisiativa independiente · No ta un servisio ofisial di gobierno ni un sistema implementá.</p>
+ </aside>
+</main>
+<footer><span>© Digital Kòrsou — Boske di AI · GPT Innovation by Attaf</span><span>Papiamentu first · Privacy by design · Pilot only</span></footer>
+</div>
+<script type="module" src="/app.js"></script>
+</body></html>
